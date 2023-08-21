@@ -1,6 +1,11 @@
 package gpython_engine
 
-import "github.com/go-python/gpython/py"
+import (
+	"math/big"
+
+	"github.com/go-python/gpython/py"
+	"github.com/gookit/goutil"
+)
 
 type PyGoInt interface {
 	GoInt() (int, error)
@@ -63,4 +68,63 @@ func P2G_Any(p py.Object, unknow func(py.Object) any) (any, error) {
 		return nil, nil
 	}
 	return unknow(p), nil
+}
+
+func P2G_Value(p py.Object) (any, error) {
+	return P2G_Any(p, func(v py.Object) any {
+		return goutil.String(v)
+	})
+}
+
+func G2P_Value(v any) py.Object {
+	if v == nil {
+		return py.None
+	}
+	switch rv := v.(type) {
+	case bool:
+		if rv {
+			return py.True
+		} else {
+			return py.False
+		}
+	case int:
+		return py.Int(rv)
+	case uint8:
+		return py.Int(int(rv))
+	case int16:
+		return py.Int(int(rv))
+	case uint16:
+		return py.Int(int(rv))
+	case int32:
+		return py.Int(int(rv))
+	case uint32:
+		return py.Int(int(rv))
+	case int64:
+		o := &big.Int{}
+		o.SetInt64(rv)
+		return (*py.BigInt)(o)
+	case uint64:
+		o := &big.Int{}
+		o.SetUint64(rv)
+		return (*py.BigInt)(o)
+	case float32:
+		return py.Float(float64(rv))
+	case float64:
+		return py.Float(rv)
+	case string:
+		return py.String(rv)
+	case []any:
+		tuple := make([]py.Object, len(rv))
+		for i, v := range rv {
+			tuple[i] = G2P_Value(v)
+		}
+		return py.NewListFromItems(tuple)
+	case map[string]any:
+		dict := py.NewStringDict()
+		for k, v := range rv {
+			dict[k] = G2P_Value(v)
+		}
+		return dict
+	}
+	return py.None
 }
