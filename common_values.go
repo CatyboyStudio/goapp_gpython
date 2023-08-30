@@ -1,10 +1,10 @@
 package gpython_engine
 
 import (
+	"goapp_commons/valconv"
 	"math/big"
 
 	"github.com/go-python/gpython/py"
-	"github.com/gookit/goutil"
 )
 
 type PyGoInt interface {
@@ -72,7 +72,7 @@ func P2G_Any(p py.Object, unknow func(py.Object) any) (any, error) {
 
 func P2G_Value(p py.Object) (any, error) {
 	return P2G_Any(p, func(v py.Object) any {
-		return goutil.String(v)
+		return valconv.AnyToString(v)
 	})
 }
 

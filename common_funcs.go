@@ -1,8 +1,10 @@
 package gpython_engine
 
 import (
+	"bytes"
+	"goapp_commons/valconv"
+
 	"github.com/go-python/gpython/py"
-	"github.com/gookit/goutil/byteutil"
 )
 
 func MakePrintFunc(printf func(msg string)) func(py.Object, py.Tuple, py.StringDict) (py.Object, error) {
@@ -20,7 +22,7 @@ func MakePrintFunc(printf func(msg string)) func(py.Object, py.Tuple, py.StringD
 		sep := sepObj.(py.String)
 		end := endObj.(py.String)
 
-		buf := byteutil.NewBuffer()
+		buf := bytes.NewBuffer(nil)
 		for i, v := range args {
 			v, err := py.Str(v)
 			if err != nil {
@@ -28,14 +30,14 @@ func MakePrintFunc(printf func(msg string)) func(py.Object, py.Tuple, py.StringD
 			}
 
 			rv, _ := P2G_Any(v, nil)
-			buf.WriteAny(rv)
+			buf.WriteString(valconv.AnyToString(rv))
 
 			if i != len(args)-1 {
-				buf.WriteAny(sep)
+				buf.WriteString(string(sep))
 			}
 		}
 
-		buf.WriteAny(end)
+		buf.WriteString(string(end))
 
 		printf(buf.String())
 		return py.None, nil
