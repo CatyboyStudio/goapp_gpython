@@ -2,7 +2,6 @@ package goapp_gpython
 
 import (
 	"goapp_commons/valconv"
-	"math/big"
 
 	"github.com/go-python/gpython/py"
 )
@@ -64,6 +63,11 @@ func P2G_Any(p py.Object, unknow func(py.Object) any) (any, error) {
 	if f, ok := p.(PyGoInt64); ok {
 		return f.GoInt64()
 	}
+	for _, f := range toAnyFuncs {
+		if rv, ok := f(p); ok {
+			return rv, nil
+		}
+	}
 	if unknow == nil {
 		return nil, nil
 	}
@@ -100,13 +104,9 @@ func G2P_Value(v any) py.Object {
 	case uint32:
 		return py.Int(int(rv))
 	case int64:
-		o := &big.Int{}
-		o.SetInt64(rv)
-		return (*py.BigInt)(o)
+		return py.Int(rv)
 	case uint64:
-		o := &big.Int{}
-		o.SetUint64(rv)
-		return (*py.BigInt)(o)
+		return py.Int(int64(rv))
 	case float32:
 		return py.Float(float64(rv))
 	case float64:
@@ -126,5 +126,21 @@ func G2P_Value(v any) py.Object {
 		}
 		return dict
 	}
+	for _, f := range anyToFuncs {
+		if rv, ok := f(v); ok {
+			return rv
+		}
+	}
 	return py.None
+}
+
+var anyToFuncs []func(v any) (py.Object, bool)
+var toAnyFuncs []func(v py.Object) (any, bool)
+
+func RegisterAnyTo(f func(v any) (py.Object, bool)) {
+	anyToFuncs = append(anyToFuncs, f)
+}
+
+func RegisterToAny(f func(v py.Object) (any, bool)) {
+	toAnyFuncs = append(toAnyFuncs, f)
 }
