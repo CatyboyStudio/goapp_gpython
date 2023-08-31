@@ -1,4 +1,4 @@
-package gpython_engine
+package goapp_gpython
 
 import "reflect"
 

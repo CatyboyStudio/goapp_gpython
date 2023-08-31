@@ -1,6 +1,10 @@
-package gpython_engine
+package goapp_gpython
 
-import "log"
+import (
+	"fmt"
+
+	"golang.org/x/exp/slog"
+)
 
 var PyExecAtEnv func(func()) = func(f func()) {
 	f()
@@ -11,11 +15,9 @@ var PyCallAtEnv func(func() any) any = func(f func() any) any {
 }
 
 var PyLogWarn func(format string, a ...any) = func(format string, a ...any) {
-	log.Printf(format, a...)
-	log.Println()
+	slog.Warn(fmt.Sprintf(format, a...))
 }
 
 var PyLogError func(format string, a ...any) = func(format string, a ...any) {
-	log.Printf(format, a...)
-	log.Println()
+	slog.Error(fmt.Sprintf(format, a...))
 }
