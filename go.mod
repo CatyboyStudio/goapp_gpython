@@ -1,4 +1,4 @@
-module gpython_engine
+module goapp_gpython
 
 go 1.21
 
